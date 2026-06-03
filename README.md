@@ -88,6 +88,12 @@ See [config.example.toml](config.example.toml) for a full example.
 | `password` | string | *required* | MySQL password |
 | `databases` | []string | *required* | List of database names to back up |
 
+### `[storage]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `backend` | string | `"r2"` | Storage backend: `"r2"` (Cloudflare R2) or `"s3"` (AWS S3 / S3-compatible) |
+
 ### `[storage.r2]`
 
 | Key | Type | Default | Description |
@@ -97,6 +103,17 @@ See [config.example.toml](config.example.toml) for a full example.
 | `access_key_secret` | string | *required* | R2 API token Secret Access Key |
 | `bucket` | string | *required* | R2 bucket name |
 | `path_prefix` | string | `""` | Prefix for object keys (e.g. `"mysql/"` → `mysql/mydb_20240101_020000.sql.gz`) |
+
+### `[storage.s3]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `region` | string | *required* | AWS region (e.g. `"ap-southeast-1"`) |
+| `access_key_id` | string | *optional* | AWS Access Key ID (falls back to default credentials) |
+| `secret_access_key` | string | *optional* | AWS Secret Access Key |
+| `bucket` | string | *required* | S3 bucket name |
+| `path_prefix` | string | `""` | Prefix for object keys |
+| `endpoint` | string | `""` | Custom endpoint for S3-compatible services (MinIO, etc.) |
 
 ### `[retention]`
 

@@ -19,12 +19,24 @@ user = "root"
 password = ""
 databases = ["mydb"]
 
+[storage]
+# backend = "r2" | "s3"
+backend = "r2"
+
 [storage.r2]
 account_id = ""
 access_key_id = ""
 access_key_secret = ""
 bucket = ""
 path_prefix = "mysql/"
+
+# [storage.s3]
+# region = "ap-southeast-1"
+# access_key_id = ""
+# secret_access_key = ""
+# bucket = ""
+# path_prefix = "mysql/"
+# endpoint = ""
 
 [retention]
 # strategy = "count" | "days"

@@ -37,7 +37,16 @@ func New(cfg *config.Config, logger *slog.Logger) (*Engine, error) {
 	}
 
 	// Storage
-	store, err := storage.NewR2(cfg.Storage.R2)
+	var (
+		store storage.Storage
+		err   error
+	)
+	switch cfg.Storage.Backend {
+	case "s3":
+		store, err = storage.NewS3(cfg.Storage.S3)
+	default:
+		store, err = storage.NewR2(cfg.Storage.R2)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("init storage: %w", err)
 	}
@@ -122,7 +131,8 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 	}
 
 	// 3. Upload
-	key := fmt.Sprintf("%s%s_%s%s", e.cfg.Storage.R2.PathPrefix, database, time.Now().Format("20060102_150405"), ext)
+	prefix := e.pathPrefix()
+	key := fmt.Sprintf("%s%s_%s%s", prefix, database, time.Now().Format("20060102_150405"), ext)
 	e.logger.Info("uploading", "key", key, "size", fileSize)
 
 	if err := e.storage.Upload(ctx, key, tmp); err != nil {
@@ -131,7 +141,7 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 	}
 
 	// 4. Retention
-	deleted, err := e.retention.Apply(ctx, e.cfg.Storage.R2.PathPrefix+database+"_")
+	deleted, err := e.retention.Apply(ctx, prefix+database+"_")
 	if err != nil {
 		e.logger.Warn("retention cleanup failed", "error", err)
 	} else if deleted > 0 {
@@ -144,6 +154,13 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 	e.notify(ctx, database, key, fileSize, start, nil)
 
 	return nil
+}
+
+func (e *Engine) pathPrefix() string {
+	if e.cfg.Storage.Backend == "s3" {
+		return e.cfg.Storage.S3.PathPrefix
+	}
+	return e.cfg.Storage.R2.PathPrefix
 }
 
 func (e *Engine) notify(ctx context.Context, database, fileName string, size int64, start time.Time, backupErr error) {

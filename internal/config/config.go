@@ -33,7 +33,9 @@ type MySQLConfig struct {
 }
 
 type StorageConfig struct {
-	R2 R2Config `toml:"r2"`
+	R2      R2Config `toml:"r2"`
+	S3      S3Config `toml:"s3"`
+	Backend string   `toml:"backend"` // "r2" or "s3"
 }
 
 type R2Config struct {
@@ -42,6 +44,15 @@ type R2Config struct {
 	AccessKeySecret string `toml:"access_key_secret"`
 	Bucket          string `toml:"bucket"`
 	PathPrefix      string `toml:"path_prefix"`
+}
+
+type S3Config struct {
+	Region          string `toml:"region"`
+	AccessKeyID     string `toml:"access_key_id"`
+	SecretAccessKey  string `toml:"secret_access_key"`
+	Bucket          string `toml:"bucket"`
+	PathPrefix      string `toml:"path_prefix"`
+	Endpoint        string `toml:"endpoint"` // optional, for S3-compatible services
 }
 
 type RetentionConfig struct {
