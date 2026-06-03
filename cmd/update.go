@@ -10,8 +10,9 @@ import (
 )
 
 var updateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Check for new version",
+	Use:          "update",
+	Short:        "Check for new version",
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Current version: %s\n", Version)
 		fmt.Println("Checking for updates...")

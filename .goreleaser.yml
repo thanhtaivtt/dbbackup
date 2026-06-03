@@ -6,9 +6,9 @@ builds:
     goarch: [amd64, arm64]
     ldflags:
       - -s -w
-      - -X github.com/taivt/dbbackup/cmd.Version={{.Version}}
-      - -X github.com/taivt/dbbackup/cmd.Commit={{.ShortCommit}}
-      - -X github.com/taivt/dbbackup/cmd.Date={{.Date}}
+      - -X github.com/thanhtaivtt/dbbackup/cmd.Version={{.Version}}
+      - -X github.com/thanhtaivtt/dbbackup/cmd.Commit={{.ShortCommit}}
+      - -X github.com/thanhtaivtt/dbbackup/cmd.Date={{.Date}}
 
 archives:
   - format: tar.gz

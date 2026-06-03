@@ -1,10 +1,12 @@
 package dumper
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 
 	"github.com/thanhtaivtt/dbbackup/internal/config"
 )
@@ -29,6 +31,9 @@ func (d *MySQLBinaryDumper) Dump(ctx context.Context, database string) (io.ReadC
 	}
 
 	cmd := exec.CommandContext(ctx, "mysqldump", args...)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, fmt.Errorf("creating stdout pipe: %w", err)
@@ -38,15 +43,22 @@ func (d *MySQLBinaryDumper) Dump(ctx context.Context, database string) (io.ReadC
 		return nil, fmt.Errorf("starting mysqldump: %w", err)
 	}
 
-	return &cmdReadCloser{ReadCloser: stdout, cmd: cmd}, nil
+	return &cmdReadCloser{ReadCloser: stdout, cmd: cmd, stderr: &stderr}, nil
 }
 
 type cmdReadCloser struct {
 	io.ReadCloser
-	cmd *exec.Cmd
+	cmd    *exec.Cmd
+	stderr *bytes.Buffer
 }
 
 func (c *cmdReadCloser) Close() error {
 	c.ReadCloser.Close()
-	return c.cmd.Wait()
+	if err := c.cmd.Wait(); err != nil {
+		if c.stderr.Len() > 0 {
+			return fmt.Errorf("mysqldump: %s", strings.TrimSpace(c.stderr.String()))
+		}
+		return fmt.Errorf("mysqldump: %w", err)
+	}
+	return nil
 }

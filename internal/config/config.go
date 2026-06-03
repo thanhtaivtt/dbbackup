@@ -86,7 +86,41 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("parsing config: %w", err)
 	}
 
+	if err := cfg.validate(); err != nil {
+		return nil, err
+	}
+
 	return cfg, nil
+}
+
+func (c *Config) validate() error {
+	if c.Database.MySQL.User == "" {
+		return fmt.Errorf("config: database.mysql.user is required")
+	}
+	if len(c.Database.MySQL.Databases) == 0 {
+		return fmt.Errorf("config: database.mysql.databases is required")
+	}
+	if c.Storage.R2.AccountID == "" {
+		return fmt.Errorf("config: storage.r2.account_id is required")
+	}
+	if c.Storage.R2.AccessKeyID == "" {
+		return fmt.Errorf("config: storage.r2.access_key_id is required")
+	}
+	if c.Storage.R2.AccessKeySecret == "" {
+		return fmt.Errorf("config: storage.r2.access_key_secret is required")
+	}
+	if c.Storage.R2.Bucket == "" {
+		return fmt.Errorf("config: storage.r2.bucket is required")
+	}
+	if c.Notification.Telegram.Enabled {
+		if c.Notification.Telegram.BotToken == "" {
+			return fmt.Errorf("config: notification.telegram.bot_token is required when enabled")
+		}
+		if c.Notification.Telegram.ChatID == "" {
+			return fmt.Errorf("config: notification.telegram.chat_id is required when enabled")
+		}
+	}
+	return nil
 }
 
 func (c *Config) DSN() string {

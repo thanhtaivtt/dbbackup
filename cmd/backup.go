@@ -17,8 +17,9 @@ var (
 )
 
 var backupCmd = &cobra.Command{
-	Use:   "backup",
-	Short: "Run database backup",
+	Use:          "backup",
+	Short:        "Run database backup",
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Load(cfgFile)
 		if err != nil {

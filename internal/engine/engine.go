@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -61,10 +62,14 @@ func New(cfg *config.Config, logger *slog.Logger) (*Engine, error) {
 }
 
 func (e *Engine) Run(ctx context.Context) error {
+	var errs []error
 	for _, db := range e.cfg.Database.MySQL.Databases {
 		if err := e.backupDatabase(ctx, db); err != nil {
-			return err
+			errs = append(errs, err)
 		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("backup failed for %d database(s): %w", len(errs), errors.Join(errs...))
 	}
 	return nil
 }
