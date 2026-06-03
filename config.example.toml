@@ -1,0 +1,29 @@
+[backup]
+compress = true
+# dump_method = "go" | "binary"
+dump_method = "go"
+
+[database.mysql]
+host = "localhost"
+port = 3306
+user = "root"
+password = "secret"
+databases = ["mydb"]
+
+[storage.r2]
+account_id = "your-account-id"
+access_key_id = "your-access-key-id"
+access_key_secret = "your-access-key-secret"
+bucket = "db-backups"
+path_prefix = "mysql/"
+
+[retention]
+# strategy = "count" | "days"
+strategy = "count"
+count = 7
+# days = 30
+
+[notification.telegram]
+enabled = true
+bot_token = "your-bot-token"
+chat_id = "your-chat-id"

@@ -1,0 +1,29 @@
+version: 2
+
+builds:
+  - binary: dbbackup
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X github.com/taivt/dbbackup/cmd.Version={{.Version}}
+      - -X github.com/taivt/dbbackup/cmd.Commit={{.ShortCommit}}
+      - -X github.com/taivt/dbbackup/cmd.Date={{.Date}}
+
+archives:
+  - format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^ci:"
+      - "^chore:"

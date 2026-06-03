@@ -1,0 +1,23 @@
+# Binary
+dbbackup
+dbbackup.exe
+
+# Config with secrets
+config.toml
+.env
+
+# Build artifacts
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage.out
