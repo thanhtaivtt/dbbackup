@@ -52,12 +52,24 @@ type RetentionConfig struct {
 
 type NotificationConfig struct {
 	Telegram TelegramConfig `toml:"telegram"`
+	Slack    SlackConfig    `toml:"slack"`
+	Webhook  WebhookConfig  `toml:"webhook"`
 }
 
 type TelegramConfig struct {
 	Enabled  bool   `toml:"enabled"`
 	BotToken string `toml:"bot_token"`
 	ChatID   string `toml:"chat_id"`
+}
+
+type SlackConfig struct {
+	Enabled    bool   `toml:"enabled"`
+	WebhookURL string `toml:"webhook_url"`
+}
+
+type WebhookConfig struct {
+	Enabled bool   `toml:"enabled"`
+	URL     string `toml:"url"`
 }
 
 func Load(path string) (*Config, error) {
@@ -118,6 +130,16 @@ func (c *Config) validate() error {
 		}
 		if c.Notification.Telegram.ChatID == "" {
 			return fmt.Errorf("config: notification.telegram.chat_id is required when enabled")
+		}
+	}
+	if c.Notification.Slack.Enabled {
+		if c.Notification.Slack.WebhookURL == "" {
+			return fmt.Errorf("config: notification.slack.webhook_url is required when enabled")
+		}
+	}
+	if c.Notification.Webhook.Enabled {
+		if c.Notification.Webhook.URL == "" {
+			return fmt.Errorf("config: notification.webhook.url is required when enabled")
 		}
 	}
 	return nil

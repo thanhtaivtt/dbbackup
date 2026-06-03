@@ -50,6 +50,12 @@ func New(cfg *config.Config, logger *slog.Logger) (*Engine, error) {
 	if cfg.Notification.Telegram.Enabled {
 		notifiers = append(notifiers, notifier.NewTelegram(cfg.Notification.Telegram))
 	}
+	if cfg.Notification.Slack.Enabled {
+		notifiers = append(notifiers, notifier.NewSlack(cfg.Notification.Slack))
+	}
+	if cfg.Notification.Webhook.Enabled {
+		notifiers = append(notifiers, notifier.NewWebhook(cfg.Notification.Webhook))
+	}
 
 	return &Engine{
 		cfg:       cfg,

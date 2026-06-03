@@ -36,6 +36,14 @@ count = 7
 enabled = false
 bot_token = ""
 chat_id = ""
+
+[notification.slack]
+enabled = false
+webhook_url = ""
+
+[notification.webhook]
+enabled = false
+url = ""
 `
 
 var initCmd = &cobra.Command{

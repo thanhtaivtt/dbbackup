@@ -4,7 +4,7 @@ compress = true
 dump_method = "go"
 
 [database.mysql]
-host = "localhost"
+host = "127.0.0.1"
 port = 3306
 user = "root"
 password = "secret"
@@ -24,6 +24,14 @@ count = 7
 # days = 30
 
 [notification.telegram]
-enabled = true
+enabled = false
 bot_token = "your-bot-token"
 chat_id = "your-chat-id"
+
+[notification.slack]
+enabled = false
+webhook_url = "https://hooks.slack.com/services/T.../B.../xxx"
+
+[notification.webhook]
+enabled = false
+url = "https://your-server.com/webhook/backup"

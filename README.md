@@ -114,6 +114,20 @@ See [config.example.toml](config.example.toml) for a full example.
 | `bot_token` | string | *required* | Telegram Bot API token (from [@BotFather](https://t.me/BotFather)) |
 | `chat_id` | string | *required* | Target chat/group ID (use [@userinfobot](https://t.me/userinfobot) to find) |
 
+### `[notification.slack]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | bool | `false` | Enable Slack notifications |
+| `webhook_url` | string | *required* | Slack Incoming Webhook URL |
+
+### `[notification.webhook]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | bool | `false` | Enable generic webhook notifications |
+| `url` | string | *required* | Webhook endpoint URL (receives JSON POST) |
+
 ### Minimal config example
 
 ```toml
@@ -158,6 +172,14 @@ count = 7
 enabled = true
 bot_token = "123456:ABC-DEF"
 chat_id = "-1001234567890"
+
+[notification.slack]
+enabled = false
+webhook_url = "https://hooks.slack.com/services/T.../B.../xxx"
+
+[notification.webhook]
+enabled = false
+url = "https://your-server.com/webhook/backup"
 ```
 
 ## CLI Flags
