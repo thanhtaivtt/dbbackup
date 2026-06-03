@@ -32,7 +32,7 @@ func (t *TelegramNotifier) Notify(ctx context.Context, msg Message) error {
 	payload := map[string]string{
 		"chat_id":    t.chatID,
 		"text":       text,
-		"parse_mode": "Markdown",
+		"parse_mode": "HTML",
 	}
 
 	body, _ := json.Marshal(payload)
@@ -64,11 +64,11 @@ func formatMessage(msg Message) string {
 		status = "Error"
 	}
 
-	text := fmt.Sprintf("%s *DB Backup %s*\n\n", icon, status)
-	text += fmt.Sprintf("📦 Database: `%s`\n", msg.Database)
+	text := fmt.Sprintf("%s <b>DB Backup %s</b>\n\n", icon, status)
+	text += fmt.Sprintf("📦 Database: <code>%s</code>\n", msg.Database)
 
 	if msg.FileName != "" {
-		text += fmt.Sprintf("📄 File: `%s`\n", msg.FileName)
+		text += fmt.Sprintf("📄 File: <code>%s</code>\n", msg.FileName)
 	}
 	if msg.FileSize > 0 {
 		text += fmt.Sprintf("📏 Size: %s\n", formatSize(msg.FileSize))
