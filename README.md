@@ -20,6 +20,12 @@ A CLI tool for backing up databases to cloud storage. Currently supports MySQL â
 
 ## Installation
 
+### Quick install (Linux/macOS)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/thanhtaivtt/dbbackup/main/install.sh | sh
+```
+
 ### From releases
 
 Download the latest binary from the [Releases](https://github.com/thanhtaivtt/dbbackup/releases) page.
