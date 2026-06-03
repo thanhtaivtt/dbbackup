@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -30,10 +31,25 @@ func NewR2(cfg config.R2Config) (*R2Storage, error) {
 func (s *R2Storage) Name() string { return "r2" }
 
 func (s *R2Storage) Upload(ctx context.Context, key string, reader io.Reader) error {
-	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
+	// Buffer to temp file for seekable upload (S3 SDK needs rewind on retry)
+	tmp, err := os.CreateTemp("", "dbbackup-*")
+	if err != nil {
+		return fmt.Errorf("creating temp file: %w", err)
+	}
+	defer os.Remove(tmp.Name())
+	defer tmp.Close()
+
+	if _, err := io.Copy(tmp, reader); err != nil {
+		return fmt.Errorf("buffering upload data: %w", err)
+	}
+	if _, err := tmp.Seek(0, io.SeekStart); err != nil {
+		return fmt.Errorf("seeking temp file: %w", err)
+	}
+
+	_, err = s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: &s.bucket,
 		Key:    &key,
-		Body:   reader,
+		Body:   tmp,
 	})
 	if err != nil {
 		return fmt.Errorf("r2 upload %s: %w", key, err)
