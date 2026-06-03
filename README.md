@@ -162,6 +162,13 @@ chat_id = "-1001234567890"
 | `-v, --verbose` | Enable debug logging |
 | `--version` | Print version info |
 
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `backup` | Run database backup |
+| `update` | Check for new version on GitHub |
+
 ## Extending
 
 ### Add a new database

@@ -20,8 +20,16 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "dbbackup",
-	Short:   "Database backup tool with cloud storage support",
+	Use:   "dbbackup",
+	Short: "Database backup tool with cloud storage support",
+	Long: `dbbackup - A CLI tool for backing up databases to cloud storage.
+
+Currently supports MySQL → Cloudflare R2, designed to be extensible
+for additional databases and storage backends.
+
+Commands:
+  backup    Run database backup
+  update    Check for new version on GitHub`,
 	Version: Version,
 }
 
