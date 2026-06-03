@@ -127,3 +127,11 @@ func (c *Config) DSN() string {
 	m := c.Database.MySQL
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/", m.User, m.Password, m.Host, m.Port)
 }
+
+// DumpDSN returns DSN with database name for mysqldump library.
+// The jarvanstack/mysqldump library requires ?parseTime=true or similar
+// query parameter in DSN to correctly parse the database name.
+func (c *Config) DumpDSN(database string) string {
+	m := c.Database.MySQL
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", m.User, m.Password, m.Host, m.Port, database)
+}
