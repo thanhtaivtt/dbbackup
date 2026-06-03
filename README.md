@@ -45,8 +45,11 @@ make build
 ## Usage
 
 ```bash
-# Copy and edit config
-cp config.example.toml config.toml
+# Generate config file
+dbbackup init
+
+# Edit config
+vim config.toml
 
 # Run backup
 dbbackup backup --config config.toml
@@ -172,6 +175,7 @@ chat_id = "-1001234567890"
 
 | Command | Description |
 |---------|-------------|
+| `init` | Generate a config file |
 | `backup` | Run database backup |
 | `update` | Check for new version on GitHub |
 

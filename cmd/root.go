@@ -28,6 +28,7 @@ Currently supports MySQL → Cloudflare R2, designed to be extensible
 for additional databases and storage backends.
 
 Commands:
+  init      Generate a config file
   backup    Run database backup
   update    Check for new version on GitHub`,
 	Version: Version,
