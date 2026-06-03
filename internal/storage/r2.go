@@ -31,25 +31,29 @@ func NewR2(cfg config.R2Config) (*R2Storage, error) {
 func (s *R2Storage) Name() string { return "r2" }
 
 func (s *R2Storage) Upload(ctx context.Context, key string, reader io.Reader) error {
-	// Buffer to temp file for seekable upload (S3 SDK needs rewind on retry)
-	tmp, err := os.CreateTemp("", "dbbackup-*")
-	if err != nil {
-		return fmt.Errorf("creating temp file: %w", err)
-	}
-	defer os.Remove(tmp.Name())
-	defer tmp.Close()
+	// If reader is not seekable, buffer to temp file for S3 SDK retry support
+	rs, ok := reader.(io.ReadSeeker)
+	if !ok {
+		tmp, err := os.CreateTemp("", "dbbackup-upload-*")
+		if err != nil {
+			return fmt.Errorf("creating temp file: %w", err)
+		}
+		defer os.Remove(tmp.Name())
+		defer tmp.Close()
 
-	if _, err := io.Copy(tmp, reader); err != nil {
-		return fmt.Errorf("buffering upload data: %w", err)
-	}
-	if _, err := tmp.Seek(0, io.SeekStart); err != nil {
-		return fmt.Errorf("seeking temp file: %w", err)
+		if _, err := io.Copy(tmp, reader); err != nil {
+			return fmt.Errorf("buffering upload: %w", err)
+		}
+		if _, err := tmp.Seek(0, io.SeekStart); err != nil {
+			return fmt.Errorf("seeking: %w", err)
+		}
+		rs = tmp
 	}
 
-	_, err = s.client.PutObject(ctx, &s3.PutObjectInput{
+	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: &s.bucket,
 		Key:    &key,
-		Body:   tmp,
+		Body:   rs,
 	})
 	if err != nil {
 		return fmt.Errorf("r2 upload %s: %w", key, err)

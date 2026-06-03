@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/thanhtaivtt/dbbackup/internal/compress"
@@ -73,27 +74,47 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 	e.logger.Info("starting backup", "database", database)
 
 	// 1. Dump
+	e.logger.Debug("dumping database", "database", database, "method", e.dumper.Name())
 	reader, err := e.dumper.Dump(ctx, database)
 	if err != nil {
 		e.notify(ctx, database, "", 0, start, err)
 		return fmt.Errorf("dump %s: %w", database, err)
 	}
-	defer reader.Close()
 
-	// 2. Compress (optional)
-	var body io.Reader = reader
+	// 2. Compress (optional) + buffer to temp file
 	ext := ".sql"
+	var body io.Reader = reader
 	if e.cfg.Backup.Compress {
 		body = compress.NewGzipReader(reader)
 		ext = ".sql.gz"
 	}
 
+	// Buffer to temp file (needed for: detecting dump errors early, seekable upload)
+	tmp, err := os.CreateTemp("", "dbbackup-dump-*")
+	if err != nil {
+		reader.Close()
+		return fmt.Errorf("creating temp file: %w", err)
+	}
+	defer os.Remove(tmp.Name())
+	defer tmp.Close()
+
+	if _, err := io.Copy(tmp, body); err != nil {
+		reader.Close()
+		e.notify(ctx, database, "", 0, start, err)
+		return fmt.Errorf("dump %s: %w", database, err)
+	}
+	reader.Close()
+
+	fileSize, _ := tmp.Seek(0, io.SeekEnd)
+	if _, err := tmp.Seek(0, io.SeekStart); err != nil {
+		return fmt.Errorf("seeking temp file: %w", err)
+	}
+
 	// 3. Upload
 	key := fmt.Sprintf("%s%s_%s%s", e.cfg.Storage.R2.PathPrefix, database, time.Now().Format("20060102_150405"), ext)
-	e.logger.Info("uploading", "key", key)
+	e.logger.Info("uploading", "key", key, "size", fileSize)
 
-	cr := &countingReader{Reader: body}
-	if err := e.storage.Upload(ctx, key, cr); err != nil {
+	if err := e.storage.Upload(ctx, key, tmp); err != nil {
 		e.notify(ctx, database, key, 0, start, err)
 		return fmt.Errorf("upload %s: %w", key, err)
 	}
@@ -108,8 +129,8 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 
 	// 5. Notify success
 	duration := time.Since(start)
-	e.logger.Info("backup complete", "database", database, "size", cr.n, "duration", duration)
-	e.notify(ctx, database, key, cr.n, start, nil)
+	e.logger.Info("backup complete", "database", database, "size", fileSize, "duration", duration)
+	e.notify(ctx, database, key, fileSize, start, nil)
 
 	return nil
 }
@@ -134,13 +155,3 @@ func (e *Engine) notify(ctx context.Context, database, fileName string, size int
 	}
 }
 
-type countingReader struct {
-	io.Reader
-	n int64
-}
-
-func (c *countingReader) Read(p []byte) (int, error) {
-	n, err := c.Reader.Read(p)
-	c.n += int64(n)
-	return n, err
-}
