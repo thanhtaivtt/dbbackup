@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/thanhtaivtt/dbbackup/internal/config"
 )
@@ -18,7 +19,7 @@ type SlackNotifier struct {
 func NewSlack(cfg config.SlackConfig) *SlackNotifier {
 	return &SlackNotifier{
 		webhookURL: cfg.WebhookURL,
-		client:     &http.Client{},
+		client:     &http.Client{Timeout: 30 * time.Second},
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/thanhtaivtt/dbbackup/internal/config"
 )
@@ -20,7 +21,7 @@ func NewTelegram(cfg config.TelegramConfig) *TelegramNotifier {
 	return &TelegramNotifier{
 		botToken: cfg.BotToken,
 		chatID:   cfg.ChatID,
-		client:   &http.Client{},
+		client:   &http.Client{Timeout: 30 * time.Second},
 	}
 }
 

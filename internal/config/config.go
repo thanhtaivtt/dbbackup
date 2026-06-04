@@ -123,18 +123,30 @@ func (c *Config) validate() error {
 	if len(c.Database.MySQL.Databases) == 0 {
 		return fmt.Errorf("config: database.mysql.databases is required")
 	}
-	if c.Storage.R2.AccountID == "" {
-		return fmt.Errorf("config: storage.r2.account_id is required")
+
+	switch c.Storage.Backend {
+	case "s3":
+		if c.Storage.S3.Region == "" {
+			return fmt.Errorf("config: storage.s3.region is required")
+		}
+		if c.Storage.S3.Bucket == "" {
+			return fmt.Errorf("config: storage.s3.bucket is required")
+		}
+	default:
+		if c.Storage.R2.AccountID == "" {
+			return fmt.Errorf("config: storage.r2.account_id is required")
+		}
+		if c.Storage.R2.AccessKeyID == "" {
+			return fmt.Errorf("config: storage.r2.access_key_id is required")
+		}
+		if c.Storage.R2.AccessKeySecret == "" {
+			return fmt.Errorf("config: storage.r2.access_key_secret is required")
+		}
+		if c.Storage.R2.Bucket == "" {
+			return fmt.Errorf("config: storage.r2.bucket is required")
+		}
 	}
-	if c.Storage.R2.AccessKeyID == "" {
-		return fmt.Errorf("config: storage.r2.access_key_id is required")
-	}
-	if c.Storage.R2.AccessKeySecret == "" {
-		return fmt.Errorf("config: storage.r2.access_key_secret is required")
-	}
-	if c.Storage.R2.Bucket == "" {
-		return fmt.Errorf("config: storage.r2.bucket is required")
-	}
+
 	if c.Notification.Telegram.Enabled {
 		if c.Notification.Telegram.BotToken == "" {
 			return fmt.Errorf("config: notification.telegram.bot_token is required when enabled")

@@ -104,17 +104,25 @@ func (s *S3Storage) Delete(ctx context.Context, keys []string) error {
 		return nil
 	}
 
-	deleteObjects := make([]types.ObjectIdentifier, len(keys))
-	for i, key := range keys {
-		deleteObjects[i] = types.ObjectIdentifier{Key: aws.String(key)}
-	}
+	for i := 0; i < len(keys); i += 1000 {
+		end := i + 1000
+		if end > len(keys) {
+			end = len(keys)
+		}
+		batch := keys[i:end]
 
-	_, err := s.client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
-		Bucket: &s.bucket,
-		Delete: &types.Delete{Objects: deleteObjects},
-	})
-	if err != nil {
-		return fmt.Errorf("s3 delete: %w", err)
+		deleteObjects := make([]types.ObjectIdentifier, len(batch))
+		for j, key := range batch {
+			deleteObjects[j] = types.ObjectIdentifier{Key: aws.String(key)}
+		}
+
+		_, err := s.client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
+			Bucket: &s.bucket,
+			Delete: &types.Delete{Objects: deleteObjects},
+		})
+		if err != nil {
+			return fmt.Errorf("s3 delete: %w", err)
+		}
 	}
 	return nil
 }

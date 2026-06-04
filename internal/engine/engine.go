@@ -103,7 +103,7 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 
 	// 2. Compress (optional) + buffer to temp file
 	ext := ".sql"
-	var body io.Reader = reader
+	var body io.ReadCloser = reader
 	if e.cfg.Backup.Compress {
 		body = compress.NewGzipReader(reader)
 		ext = ".sql.gz"
@@ -119,10 +119,12 @@ func (e *Engine) backupDatabase(ctx context.Context, database string) error {
 	defer tmp.Close()
 
 	if _, err := io.Copy(tmp, body); err != nil {
+		body.Close()
 		reader.Close()
 		e.notify(ctx, database, "", 0, start, err)
 		return fmt.Errorf("dump %s: %w", database, err)
 	}
+	body.Close()
 	reader.Close()
 
 	fileSize, _ := tmp.Seek(0, io.SeekEnd)

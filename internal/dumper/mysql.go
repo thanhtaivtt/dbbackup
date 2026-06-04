@@ -19,17 +19,27 @@ func NewMySQL(cfg *config.Config) *MySQLDumper {
 
 func (d *MySQLDumper) Name() string { return "mysql-go" }
 
-func (d *MySQLDumper) Dump(_ context.Context, database string) (io.ReadCloser, error) {
+func (d *MySQLDumper) Dump(ctx context.Context, database string) (io.ReadCloser, error) {
 	pr, pw := io.Pipe()
 
 	go func() {
 		dsn := d.cfg.DumpDSN(database)
-		err := mysqldump.Dump(dsn, mysqldump.WithWriter(pw), mysqldump.WithAllTable(), mysqldump.WithData())
-		if err != nil {
-			pw.CloseWithError(fmt.Errorf("mysqldump: %w", err))
-			return
+
+		done := make(chan error, 1)
+		go func() {
+			done <- mysqldump.Dump(dsn, mysqldump.WithWriter(pw), mysqldump.WithAllTable(), mysqldump.WithData())
+		}()
+
+		select {
+		case err := <-done:
+			if err != nil {
+				pw.CloseWithError(fmt.Errorf("mysqldump: %w", err))
+				return
+			}
+			pw.Close()
+		case <-ctx.Done():
+			pw.CloseWithError(ctx.Err())
 		}
-		pw.Close()
 	}()
 
 	return pr, nil

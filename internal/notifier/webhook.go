@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/thanhtaivtt/dbbackup/internal/config"
 )
@@ -18,7 +19,7 @@ type WebhookNotifier struct {
 func NewWebhook(cfg config.WebhookConfig) *WebhookNotifier {
 	return &WebhookNotifier{
 		url:    cfg.URL,
-		client: &http.Client{},
+		client: &http.Client{Timeout: 30 * time.Second},
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -26,11 +27,11 @@ func (d *MySQLBinaryDumper) Dump(ctx context.Context, database string) (io.ReadC
 		"-h", d.cfg.Host,
 		"-P", fmt.Sprintf("%d", d.cfg.Port),
 		"-u", d.cfg.User,
-		fmt.Sprintf("-p%s", d.cfg.Password),
 		database,
 	}
 
 	cmd := exec.CommandContext(ctx, "mysqldump", args...)
+	cmd.Env = append(os.Environ(), fmt.Sprintf("MYSQL_PWD=%s", d.cfg.Password))
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
