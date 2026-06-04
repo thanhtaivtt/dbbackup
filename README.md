@@ -6,15 +6,15 @@
 [![GitHub release](https://img.shields.io/github/v/release/thanhtaivtt/dbbackup)](https://github.com/thanhtaivtt/dbbackup/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A CLI tool for backing up databases to cloud storage. Currently supports MySQL → Cloudflare R2, designed to be extensible for additional databases and storage backends.
+A CLI tool for backing up MySQL databases to cloud storage. Supports Cloudflare R2 and AWS S3 (or any S3-compatible service) as storage backends.
 
 ## Features
 
 - **MySQL backup** via pure Go library (no external dependencies) or `mysqldump` binary
-- **Cloudflare R2** storage (S3-compatible)
+- **Cloudflare R2** and **AWS S3** storage (including S3-compatible services like MinIO)
 - **Gzip compression** (optional)
 - **Retention policies** — keep N latest backups or delete older than X days
-- **Telegram notifications** on success/failure
+- **Notifications** — Telegram, Slack, and generic webhook
 - **TOML configuration** with CLI flag overrides
 - **Extensible architecture** — easy to add new DB engines, storage backends, or notification channels
 
